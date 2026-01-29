@@ -5,11 +5,11 @@ import os
 
 app = Flask(__name__)
 
-# MongoDB connection
-MONGO_URI = os.getenv(
-    MONGO_URI = "mongodb+srv://piyushmehta200_db_user:<db_password>@cluster0.gg2yymv.mongodb.net/?appName=Cluster0"
-    
-)
+# MongoDB connection (read from environment variable)
+MONGO_URI = os.getenv("MONGO_URI")
+
+if not MONGO_URI:
+    raise Exception("MONGO_URI environment variable not set")
 
 client = MongoClient(MONGO_URI)
 db = client["github_events"]
@@ -21,6 +21,9 @@ def github_webhook():
     event_type = request.headers.get("X-GitHub-Event")
     payload = request.json
 
+    print("Event:", event_type)
+    print("Payload:", payload)
+
     if event_type == "push":
         data = {
             "author": payload.get("author", "unknown"),
@@ -30,8 +33,8 @@ def github_webhook():
             "timestamp": datetime.utcnow().isoformat()
         }
 
-        collection.insert_one(data)
-        print("Saved to MongoDB:", data)
+        result = collection.insert_one(data)
+        print("✅ Saved to MongoDB with id:", result.inserted_id)
 
     return jsonify({"status": "received"}), 200
 
