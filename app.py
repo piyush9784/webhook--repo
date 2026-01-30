@@ -42,5 +42,16 @@ def github_webhook():
     return jsonify({"status": "received"}), 200
 
 
+
+@app.route("/events", methods=["GET"])
+def get_events();
+    events = list(
+        collection.find({}, {"_id":0})
+        .sort("timestamp",-1)
+        .limit(10)
+    )
+    return jsonify(events),200
+
+
 if __name__ == "__main__":
     app.run(debug=True)
