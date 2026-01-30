@@ -1,2 +1,12 @@
-# webhook--repo
-webhook handler and UI for techstax assignment
+# webhook-repo
+
+Flask webhook handler for Techstax assignment.
+
+Receives GitHub push events and stores them in MongoDB.
+
+## Run
+- Set MONGO_URI
+- Install requirements
+- Run python app.py
+
+
