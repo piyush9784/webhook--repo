@@ -40,6 +40,10 @@ def github_webhook():
         print("MONGODB ERROR:", str(e))
 
     return jsonify({"status": "received"}), 200
+   
+    
+print("EVENTS ROUTE LOADED")
+
 
 
 
