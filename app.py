@@ -5,13 +5,7 @@ import os
 
 app = Flask(__name__)
 
-# --- DEBUG ENV ---
 MONGO_URI = os.getenv("MONGO_URI")
-print("MONGO_URI:", MONGO_URI)
-
-if not MONGO_URI:
-    raise Exception("MONGO_URI not found")
-
 client = MongoClient(MONGO_URI)
 db = client["github_events"]
 collection = db["events"]
@@ -21,40 +15,26 @@ def github_webhook():
     event_type = request.headers.get("X-GitHub-Event")
     payload = request.get_json()
 
-    print("EVENT TYPE:", event_type)
-    print("PAYLOAD:", payload)
+    data = {
+        "author": payload.get("author", "unknown"),
+        "action": event_type,
+        "from_branch": payload.get("from_branch", ""),
+        "to_branch": payload.get("to_branch", ""),
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
-    try:
-        data = {
-            "author": payload.get("author", "unknown"),
-            "action": event_type.upper(),
-            "from_branch": payload.get("from_branch", ""),
-            "to_branch": payload.get("to_branch", ""),
-            "timestamp": datetime.utcnow().isoformat()
-        }
-
-        result = collection.insert_one(data)
-        print("SAVED TO MONGODB:", result.inserted_id)
-
-    except Exception as e:
-        print("MONGODB ERROR:", str(e))
-
+    collection.insert_one(data)
     return jsonify({"status": "received"}), 200
-   
-    
-print("EVENTS ROUTE LOADED")
-
-
 
 
 @app.route("/events", methods=["GET"])
-def get_events();
+def get_events():
     events = list(
-        collection.find({}, {"_id":0})
-        .sort("timestamp",-1)
+        collection.find({}, {"_id": 0})
+        .sort("timestamp", -1)
         .limit(10)
     )
-    return jsonify(events),200
+    return jsonify(events), 200
 
 
 if __name__ == "__main__":
